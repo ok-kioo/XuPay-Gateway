@@ -25,9 +25,9 @@ export class GatewayController {
 
         const payload = request.body.payload;
 
-        const { name, document, pixKey, city } = payload as CreateCustomerPayload;
+        const { name, document, email, password, pixKey, city } = payload as CreateCustomerPayload;
 
-        this.gatewayService.createCustomer(name, document, pixKey, city, socket);
+        this.gatewayService.createCustomer(name, document, email, password, pixKey, city, socket);
     }
 
     public getCustomer(request: Request, socket: any): void {
@@ -61,9 +61,9 @@ export class GatewayController {
         
         const payload = request.body.payload;
 
-        const { id, name, document, pixKey, city } = payload as UpdateCustomerPayload;
+        const { id, name, document, email, password, pixKey, city } = payload as UpdateCustomerPayload;
 
-        this.gatewayService.updateCustomer(id, name, document, pixKey, city, request.origin?.id, socket);
+        this.gatewayService.updateCustomer(id, name, document, email, password, pixKey, city, request.origin?.id, socket);
     }
 
     public deleteCustomer(request: Request, socket: any): void {

@@ -3,17 +3,18 @@ import { ServiceClient } from "./client/ServiceClient";
 import { SocketClient } from "@/infra/client/SocketClient";
 import { ErrorHandler } from "@/infra/middleware/Error";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
+import { hashPassword } from "@/infra/provider/hash/hash";
 
 enum AssyncEvent {
-  CREATE_TRANSACTION,
-  UPDATE_TRANSACTION,
-  DELETE_TRANSACTION,
-  GET_TRANSACTION,
-  GET_TRANSACTION_HISTORY,
-  CREATE_CUSTOMER,
-  DELETE_CUSTOMER,
-  GET_CUSTOMER,
-  UPDATE_CUSTOMER
+  CREATE_TRANSACTION = "CREATE_TRANSACTION",
+  UPDATE_TRANSACTION = "UPDATE_TRANSACTION",
+  DELETE_TRANSACTION = "DELETE_TRANSACTION",
+  GET_TRANSACTION = "GET_TRANSACTION",
+  GET_TRANSACTION_HISTORY = "GET_TRANSACTION_HISTORY",
+  CREATE_CUSTOMER = "CREATE_CUSTOMER",
+  DELETE_CUSTOMER = "DELETE_CUSTOMER",
+  GET_CUSTOMER = "GET_CUSTOMER",
+  UPDATE_CUSTOMER = "UPDATE_CUSTOMER"
 }
 
 export class GatewayService {
@@ -25,15 +26,16 @@ export class GatewayService {
             parseInt(process.env.SERVICE_PORT || " ")
         );
     }
+    
 
-    public async createCustomer(name: string, document: string, pixKey: string, city: string, socket: any): Promise<void> {
-        if (!name || !document || !pixKey || !city) {
+    public async createCustomer(name: string, document: string, email: string, password: string, pixKey: string, city: string, socket: any): Promise<void> {
+        if (!name || !document || !email || !password || !pixKey || !city) {
             return ErrorHandler.handle("Dados do cliente incompletos", socket);
         }
 
-        
+        const hashedPassword = await hashPassword(password);
 
-        await this.redirectToService(AssyncEvent.CREATE_CUSTOMER.toString(), { name, document, pixKey, city }, socket);
+        await this.redirectToService(AssyncEvent.CREATE_CUSTOMER.toString(), { name, document, email, password: hashedPassword, pixKey, city }, socket);
     }
 
     public async getCustomer(customerId: string, tokenId:string, socket: any): Promise<void> {
@@ -48,7 +50,7 @@ export class GatewayService {
         await this.redirectToService(AssyncEvent.GET_CUSTOMER.toString(), { customerId }, socket);
     }
 
-    public async updateCustomer(customerId:string, name: string|undefined, document: string|undefined, pixKey: string|undefined, city: string|undefined, tokenId:string, socket: any): Promise<void> {
+    public async updateCustomer(customerId:string, name: string|undefined, document: string|undefined, email: string|undefined, password: string|undefined, pixKey: string|undefined, city: string|undefined, tokenId:string, socket: any): Promise<void> {
         if (!customerId || !tokenId) {
             return ErrorHandler.handle("Dados do cliente incompletos", socket);
         }
@@ -61,6 +63,8 @@ export class GatewayService {
 
         if (name) dataToUpdate.name = name;
         if (document) dataToUpdate.document = document;
+        if (email) dataToUpdate.email = email;
+        if (password) dataToUpdate.password = await hashPassword(password);
         if (pixKey) dataToUpdate.pixKey = pixKey;
         if (city) dataToUpdate.city = city;
         

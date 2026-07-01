@@ -34,7 +34,7 @@ export function isValidRequest(request: Request, socket: Socket): Request | void
     id: undefined
   };
 
-  if(request.path !== "create/customer"){
+  if(request.path !== "customer/create"){
 
     const tokenApiPayload = authenticateTokenApi(request);
   

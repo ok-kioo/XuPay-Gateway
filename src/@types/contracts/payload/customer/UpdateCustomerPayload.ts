@@ -5,6 +5,8 @@ export type UpdateCustomerPayload = PayloadBase & {
   id: string;
   name?: string;
   document?: string;
+  email?: string;
+  password?: string;
   balance?: string;
   pixKey?: string;
   city?: string;

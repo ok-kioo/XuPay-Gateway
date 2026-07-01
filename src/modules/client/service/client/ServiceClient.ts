@@ -1,6 +1,7 @@
 import { ServiceResponse } from "@/@types/clients/ServiceResponse";
 import { JsonValue } from "@/@types/contracts/JsonValue";
 import { SocketClient } from "@/infra/client/SocketClient";
+import { JsonCodec } from "@/infra/parser/JsonCodec";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
 
 export class ServiceClient {
@@ -45,7 +46,7 @@ export class ServiceClient {
           secret: process.env.XUPAY_SERVICE_SECRET,
           body: {
             event,
-            apiPayload
+            apiPayload: JsonCodec.stringify(apiPayload)
           },
         });
     } 
