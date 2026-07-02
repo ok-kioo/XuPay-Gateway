@@ -8,6 +8,6 @@ RUN npm ci
 COPY tsconfig.json ./
 COPY src ./src
 
-EXPOSE 6000
+EXPOSE 2000
 
 CMD ["npx", "tsx", "src/index.ts"]
