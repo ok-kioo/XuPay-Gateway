@@ -14,12 +14,18 @@ export class Routes {
     }
 
     public handle(request:Request, socket:Socket) : void  {
-
+        console.log(`recebido: ${request.method} /${request.path}`);
         if (request.method === 'GET' && request.path === 'customer') {
             this.gatewayController.getCustomer(request, socket);
         } 
 
+        else if (request.method === "POST" && request.path === "customer/login") {
+            console.log("rota encontrada: loginCustomer");
+            this.gatewayController.loginCustomer(request, socket);
+        }     
+
         else if(request.method === 'POST' && request.path === 'customer/create') {
+            console.log("rota encontrada: createCustomer");
             this.gatewayController.createCustomer(request, socket);
         }
 
@@ -52,6 +58,7 @@ export class Routes {
         }
 
         else {
+            console.log(`[Gateway][Routes] Rota não encontrada: ${request.method} /${request.path}`);
             return ErrorHandler.handle("Rota não encontrada", socket);
         }
         

@@ -5,6 +5,7 @@ import { GetTransactionPayload } from "@/@types/contracts/payload/transaction/Ge
 import { UpdateCustomerPayload } from "@/@types/contracts/payload/customer/UpdateCustomerPayload";
 import { DeleteCustomerPayload } from "./payload/customer/DeleteCustomerPayload";
 import { GetCustomerPayload } from "./payload/customer/GetCustomerPayload";
+import { LoginPayload } from "./payload/customer/LoginPayload";
 import { GetTransactionHistoryPayload } from "./payload/transaction/GetTransactionHistoryPayload";
 import { UpdateTransactionPayload } from "./payload/transaction/UpdateTransactionPayload";
 import { ServicePayload } from "./payload/ServicePayload";
@@ -15,6 +16,7 @@ export type Payload =
   | DeleteCustomerPayload
   | GetCustomerPayload
   | UpdateCustomerPayload
+  | LoginPayload
   | CreateTransactionPayload
   | DeleteTransactionPayload
   | GetTransactionPayload

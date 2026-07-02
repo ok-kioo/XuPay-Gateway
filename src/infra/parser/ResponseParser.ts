@@ -6,6 +6,7 @@ import type { JsonObject } from "./JsonCodec";
 import type { CreateCustomerPayload } from "@/@types/contracts/payload/customer/CreateCustomerPayload";
 import type { DeleteCustomerPayload } from "@/@types/contracts/payload/customer/DeleteCustomerPayload";
 import type { GetCustomerPayload } from "@/@types/contracts/payload/customer/GetCustomerPayload";
+import type { LoginPayload } from "@/@types/contracts/payload/customer/LoginPayload";
 import type { UpdateCustomerPayload } from "@/@types/contracts/payload/customer/UpdateCustomerPayload";
 import type { CreateTransactionPayload } from "@/@types/contracts/payload/transaction/CreateTransactionPayload";
 import type { DeleteTransactionPayload } from "@/@types/contracts/payload/transaction/DeleteTransactionPayload";
@@ -14,10 +15,11 @@ import type { GetTransactionPayload } from "@/@types/contracts/payload/transacti
 import type { UpdateTransactionPayload } from "@/@types/contracts/payload/transaction/UpdateTransactionPayload";
 import { ServicePayload } from "@/@types/contracts/payload/ServicePayload";
 
-type ParsedPayload = 
+type ParsedPayload =
   | CreateCustomerPayload
   | DeleteCustomerPayload
   | GetCustomerPayload
+  | LoginPayload
   | UpdateCustomerPayload
   | CreateTransactionPayload
   | DeleteTransactionPayload
@@ -59,9 +61,7 @@ export class ResponseParser {
       ([key, value]) => `${this.toHttpHeaderName(key)}: ${value}`
     );
 
-    return `${method} /${path} HTTP/1.1\r\n${headerLines.join(
-      "\r\n"
-    )}\r\n\r\n${rawBody}`;
+    return `${method} /${path} HTTP/1.1\r\n${headerLines.join("\r\n")}\r\n\r\n${rawBody}`;
   }
 
   public static serializeResponse(statusCode: number, body: JsonObject): string {
@@ -107,7 +107,7 @@ export class ResponseParser {
     body: JsonObject
   ): Request["body"] {
     return {
-      payload: this.parsePayloadByPath(path, body)
+      payload: this.parsePayloadByPath(path, body),
     };
   }
 
@@ -123,6 +123,10 @@ export class ResponseParser {
 
     if (path === "customer/create") {
       return this.parseCreateCustomerPayload(payload);
+    }
+
+    if (path === "customer/login") {
+      return this.parseLoginPayload(payload);
     }
 
     if (path === "customer/update") {
@@ -158,7 +162,6 @@ export class ResponseParser {
     }
 
     throw new Error(`Caminho inválido: ${path}`);
-    
   }
 
   private static parseServicePayload(body: JsonObject): ServicePayload {
@@ -168,18 +171,14 @@ export class ResponseParser {
     };
   }
 
-  private static parseGetCustomerPayload(
-    payload: JsonObject
-  ): GetCustomerPayload {
+  private static parseGetCustomerPayload(payload: JsonObject): GetCustomerPayload {
     return {
       kind: "GET_CUSTOMER_PAYLOAD",
       id: this.requiredString(payload.id, "id"),
     };
   }
 
-  private static parseCreateCustomerPayload(
-    payload: JsonObject
-  ): CreateCustomerPayload {
+  private static parseCreateCustomerPayload(payload: JsonObject): CreateCustomerPayload {
     return {
       kind: "CREATE_CUSTOMER_PAYLOAD",
       name: this.requiredString(payload.name, "name"),
@@ -191,9 +190,15 @@ export class ResponseParser {
     };
   }
 
-  private static parseUpdateCustomerPayload(
-    payload: JsonObject
-  ): UpdateCustomerPayload {
+  private static parseLoginPayload(payload: JsonObject): LoginPayload {
+    return {
+      kind: "LOGIN_PAYLOAD",
+      email: this.requiredString(payload.email, "email"),
+      password: this.requiredString(payload.password, "password"),
+    };
+  }
+
+  private static parseUpdateCustomerPayload(payload: JsonObject): UpdateCustomerPayload {
     return {
       kind: "UPDATE_CUSTOMER_PAYLOAD",
       id: this.requiredString(payload.id, "id"),
@@ -207,18 +212,14 @@ export class ResponseParser {
     };
   }
 
-  private static parseDeleteCustomerPayload(
-    payload: JsonObject
-  ): DeleteCustomerPayload {
+  private static parseDeleteCustomerPayload(payload: JsonObject): DeleteCustomerPayload {
     return {
       kind: "DELETE_CUSTOMER_PAYLOAD",
       id: this.requiredString(payload.id, "id"),
     };
   }
 
-  private static parseGetTransactionPayload(
-    payload: JsonObject
-  ): GetTransactionPayload {
+  private static parseGetTransactionPayload(payload: JsonObject): GetTransactionPayload {
     return {
       kind: "GET_TRANSACTION_PAYLOAD",
       id: this.requiredString(payload.id, "id"),
@@ -226,18 +227,14 @@ export class ResponseParser {
     };
   }
 
-  private static parseGetTransactionHistoryPayload(
-    payload: JsonObject
-  ): GetTransactionHistoryPayload {
+  private static parseGetTransactionHistoryPayload(payload: JsonObject): GetTransactionHistoryPayload {
     return {
       kind: "GET_TRANSACTION_HISTORY_PAYLOAD",
       customerId: this.requiredString(payload.customerId, "customerId"),
     };
   }
 
-  private static parseCreateTransactionPayload(
-    payload: JsonObject
-  ): CreateTransactionPayload {
+  private static parseCreateTransactionPayload(payload: JsonObject): CreateTransactionPayload {
     return {
       kind: "CREATE_TRANSACTION_PAYLOAD",
       amount: this.requiredString(payload.amount, "amount"),
@@ -248,9 +245,7 @@ export class ResponseParser {
     };
   }
 
-  private static parseUpdateTransactionPayload(
-    payload: JsonObject
-  ): UpdateTransactionPayload {
+  private static parseUpdateTransactionPayload(payload: JsonObject): UpdateTransactionPayload {
     return {
       kind: "UPDATE_TRANSACTION_PAYLOAD",
       id: this.requiredString(payload.id, "id"),
@@ -259,9 +254,7 @@ export class ResponseParser {
     };
   }
 
-  private static parseDeleteTransactionPayload(
-    payload: JsonObject
-  ): DeleteTransactionPayload {
+  private static parseDeleteTransactionPayload(payload: JsonObject): DeleteTransactionPayload {
     return {
       kind: "DELETE_TRANSACTION_PAYLOAD",
       customerId: this.requiredString(payload.customerId, "customerId"),
@@ -273,10 +266,7 @@ export class ResponseParser {
     return typeof value === "string" ? value : undefined;
   }
 
-  private static requiredString(
-    value: JsonValue | undefined,
-    fieldName: string
-  ): string {
+  private static requiredString(value: JsonValue | undefined, fieldName: string): string {
     if (typeof value !== "string" || !value.trim()) {
       throw new Error(`Payload inválido. Campo ${fieldName} ausente.`);
     }

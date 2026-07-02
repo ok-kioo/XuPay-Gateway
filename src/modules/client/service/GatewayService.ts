@@ -3,29 +3,30 @@ import { ServiceClient } from "./client/ServiceClient";
 import { SocketClient } from "@/infra/client/SocketClient";
 import { ErrorHandler } from "@/infra/middleware/Error";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
-import { hashPassword } from "@/infra/provider/hash/hash";
 
 enum AssyncEvent {
-  CREATE_TRANSACTION = "CREATE_TRANSACTION",
-  UPDATE_TRANSACTION = "UPDATE_TRANSACTION",
-  DELETE_TRANSACTION = "DELETE_TRANSACTION",
-  GET_TRANSACTION = "GET_TRANSACTION",
-  GET_TRANSACTION_HISTORY = "GET_TRANSACTION_HISTORY",
-  CREATE_CUSTOMER = "CREATE_CUSTOMER",
-  DELETE_CUSTOMER = "DELETE_CUSTOMER",
-  GET_CUSTOMER = "GET_CUSTOMER",
-  UPDATE_CUSTOMER = "UPDATE_CUSTOMER"
+    CREATE_TRANSACTION = "CREATE_TRANSACTION",
+    UPDATE_TRANSACTION = "UPDATE_TRANSACTION",
+    DELETE_TRANSACTION = "DELETE_TRANSACTION",
+    GET_TRANSACTION = "GET_TRANSACTION",
+    GET_TRANSACTION_HISTORY = "GET_TRANSACTION_HISTORY",
+    CREATE_CUSTOMER = "CREATE_CUSTOMER",
+    LOGIN_CUSTOMER = "LOGIN_CUSTOMER",
+    DELETE_CUSTOMER = "DELETE_CUSTOMER",
+    GET_CUSTOMER = "GET_CUSTOMER",
+    UPDATE_CUSTOMER = "UPDATE_CUSTOMER"
 }
 
 export class GatewayService {
-    private serviceClient: ServiceClient;
+  private serviceClient: ServiceClient;
 
-    constructor() {
-        this.serviceClient = new ServiceClient( new SocketClient(), 
-            process.env.SERVICE_HOST || " ", 
-            parseInt(process.env.SERVICE_PORT || " ")
-        );
-    }
+  constructor() {
+    this.serviceClient = new ServiceClient(
+      new SocketClient(),
+      process.env.SERVICE_HOST || " ",
+      parseInt(process.env.SERVICE_PORT || " ")
+    );
+  }
     
 
     public async createCustomer(name: string, document: string, email: string, password: string, pixKey: string, city: string, socket: any): Promise<void> {
@@ -33,10 +34,20 @@ export class GatewayService {
             return ErrorHandler.handle("Dados do cliente incompletos", socket);
         }
 
-        const hashedPassword = await hashPassword(password);
-
-        await this.redirectToService(AssyncEvent.CREATE_CUSTOMER.toString(), { name, document, email, password: hashedPassword, pixKey, city }, socket);
+        await this.redirectToService(AssyncEvent.CREATE_CUSTOMER.toString(), { name, document, email, password, pixKey, city }, socket);
     }
+
+  public async loginCustomer(email: string, password: string, socket: any): Promise<void> {
+    if (!email || !password) {
+      return ErrorHandler.handle("Email e senha são obrigatórios", socket);
+    }
+
+    await this.redirectToService(
+      AssyncEvent.LOGIN_CUSTOMER.toString(),
+      { email, password },
+      socket
+    );
+  }
 
     public async getCustomer(customerId: string, tokenId:string, socket: any): Promise<void> {
         if (!customerId || !tokenId) {
@@ -64,7 +75,7 @@ export class GatewayService {
         if (name) dataToUpdate.name = name;
         if (document) dataToUpdate.document = document;
         if (email) dataToUpdate.email = email;
-        if (password) dataToUpdate.password = await hashPassword(password);
+        if (password) dataToUpdate.password = password;
         if (pixKey) dataToUpdate.pixKey = pixKey;
         if (city) dataToUpdate.city = city;
         
@@ -146,6 +157,11 @@ export class GatewayService {
     private async redirectToService(event:string, apiPayload:JsonValue, socket: any): Promise<void> {
         let serviceResponse = null; 
 
+        console.log("----enviando para o serviço");
+        console.log("event:", event);
+        console.log("apiPayload:", JSON.stringify(apiPayload, null, 2));
+        console.log("---\n");
+
         try{
             serviceResponse = await this.serviceClient.send(event, apiPayload);
         } catch (error) {
@@ -155,6 +171,10 @@ export class GatewayService {
         if(serviceResponse == null){
             return ErrorHandler.handle("Falha ao receber resposta", socket);
         }
+
+        console.log("----resposta do serviço");
+        console.log(JSON.stringify(serviceResponse, null, 2));
+        console.log("----\n");
 
         const response = ResponseParser.serializeResponse(200, (serviceResponse.servicePayload ?? {}) as Record<string, any>);
 

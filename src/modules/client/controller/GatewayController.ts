@@ -4,6 +4,7 @@ import { GatewayService } from "../service/GatewayService";
 import type { CreateCustomerPayload } from "@/@types/contracts/payload/customer/CreateCustomerPayload";
 import type { DeleteCustomerPayload } from "@/@types/contracts/payload/customer/DeleteCustomerPayload";
 import type { GetCustomerPayload } from "@/@types/contracts/payload/customer/GetCustomerPayload";
+import type { LoginPayload } from "@/@types/contracts/payload/customer/LoginPayload";
 import type { UpdateCustomerPayload } from "@/@types/contracts/payload/customer/UpdateCustomerPayload";
 import type { CreateTransactionPayload } from "@/@types/contracts/payload/transaction/CreateTransactionPayload";
 import type { DeleteTransactionPayload } from "@/@types/contracts/payload/transaction/DeleteTransactionPayload";
@@ -29,6 +30,20 @@ export class GatewayController {
 
         this.gatewayService.createCustomer(name, document, email, password, pixKey, city, socket);
     }
+
+    public loginCustomer(request: Request, socket: any): void {
+        const validRequest = isValidRequest(request, socket);
+
+        if (!validRequest) {
+        return;
+        }
+
+        const payload = request.body.payload;
+
+        const { email, password } = payload as LoginPayload;
+
+        this.gatewayService.loginCustomer(email, password, socket);
+    }    
 
     public getCustomer(request: Request, socket: any): void {
         const validRequest = isValidRequest(request, socket);

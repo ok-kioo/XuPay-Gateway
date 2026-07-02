@@ -20,23 +20,26 @@ export type Request = {
   origin?: RequestOrigin;
 };
 
+const PUBLIC_ROUTES = ["customer/create", "customer/login"];
 
 export function isValidRequest(request: Request, socket: Socket): Request | void {
   request.origin = {
     service: "FRONTEND",
     ip: socket.remoteAddress,
-    id: undefined
+    id: undefined,
   };
 
-  if (request.path !== "customer/create") {
-    const tokenApiPayload = authenticateTokenApi(request);
-
-    if (!tokenApiPayload) {
-      return ErrorHandler.handle("Token de API inválido ou ausente", socket);
-    }
-
-    request.origin.id = tokenApiPayload;
+  if (PUBLIC_ROUTES.includes(request.path)) {
+    return request;
   }
+
+  const tokenApiPayload = authenticateTokenApi(request);
+
+  if (!tokenApiPayload) {
+    return ErrorHandler.handle("Token de API inválido ou ausente", socket);
+  }
+
+  request.origin.id = tokenApiPayload;
 
   return request;
 }
@@ -61,4 +64,3 @@ export function normalizePath(path: string): string {
   const trimmedPath = path.trim();
   return trimmedPath.startsWith("/") ? trimmedPath.slice(1) : trimmedPath;
 }
-
