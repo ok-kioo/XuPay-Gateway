@@ -1,7 +1,4 @@
-import {
-  createRequestSignature,
-  normalizePath,
-} from "@/@types/contracts/Request";
+import { normalizePath } from "@/@types/contracts/Request";
 import type { Request, RequestHeaders } from "@/@types/contracts/Request";
 import type { JsonValue } from "@/@types/contracts/JsonValue";
 import { JsonCodec } from "./JsonCodec";
@@ -34,8 +31,6 @@ type SerializableRequest = {
   path: string;
   headers?: RequestHeaders;
   body: JsonObject;
-  service?: string;
-  secret?: string;
 };
 
 export class ResponseParser {
@@ -59,16 +54,6 @@ export class ResponseParser {
       "content-length": Buffer.byteLength(rawBody).toString(),
       ...this.normalizeHeaders(request.headers || {}),
     };
-
-    if (request.service && request.secret) {
-      headers["x-xupay-service"] = request.service;
-      headers["x-xupay-signature"] = createRequestSignature(
-        method,
-        path,
-        rawBody,
-        request.secret
-      );
-    }
 
     const headerLines = Object.entries(headers).map(
       ([key, value]) => `${this.toHttpHeaderName(key)}: ${value}`
