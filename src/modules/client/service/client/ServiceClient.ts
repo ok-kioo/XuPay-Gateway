@@ -43,7 +43,7 @@ export class ServiceClient {
           method: "POST",
           path: "redirect",
           service: process.env.XUPAY_SERVICE_NAME || "xupay-gateway",
-          secret: process.env.XUPAY_SERVICE_SECRET,
+          secret: process.env.XUPAY_SERVICE_SECRET || "",
           body: {
             event,
             apiPayload: JsonCodec.stringify(apiPayload)

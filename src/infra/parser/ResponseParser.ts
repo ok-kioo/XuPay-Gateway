@@ -1,4 +1,4 @@
-import { normalizePath } from "@/@types/contracts/Request";
+import { createRequestSignature, normalizePath } from "@/@types/contracts/Request";
 import type { Request, RequestHeaders } from "@/@types/contracts/Request";
 import type { JsonValue } from "@/@types/contracts/JsonValue";
 import { JsonCodec } from "./JsonCodec";
@@ -31,6 +31,8 @@ type ParsedPayload =
 type SerializableRequest = {
   method: string;
   path: string;
+  service?: string;
+  secret?: string;
   headers?: RequestHeaders;
   body: JsonObject;
 };
@@ -51,17 +53,29 @@ export class ResponseParser {
     const path = normalizePath(request.path);
     const rawBody = JsonCodec.stringify(request.body);
     const headers: RequestHeaders = {
-      host: "xupay-gateway",
+      host: "xupay-message",
       "content-type": "application/json",
       "content-length": Buffer.byteLength(rawBody).toString(),
       ...this.normalizeHeaders(request.headers || {}),
     };
 
+    if (request.service && request.secret) {
+      headers["x-xupay-service"] = request.service;
+      headers["x-xupay-signature"] = createRequestSignature(
+        method,
+        path,
+        rawBody,
+        request.secret
+      );
+    }
+
     const headerLines = Object.entries(headers).map(
       ([key, value]) => `${this.toHttpHeaderName(key)}: ${value}`
     );
 
-    return `${method} /${path} HTTP/1.1\r\n${headerLines.join("\r\n")}\r\n\r\n${rawBody}`;
+    return `${method} /${path} HTTP/1.1\r\n${headerLines.join(
+      "\r\n"
+    )}\r\n\r\n${rawBody}`;
   }
 
   public static serializeResponse(statusCode: number, body: JsonObject): string {
