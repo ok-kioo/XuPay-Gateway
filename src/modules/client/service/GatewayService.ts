@@ -4,7 +4,7 @@ import { SocketClient } from "@/infra/client/SocketClient";
 import { ErrorHandler } from "@/infra/middleware/Error";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
 
-enum AssyncEvent {
+enum Events {
     CREATE_TRANSACTION = "CREATE_TRANSACTION",
     UPDATE_TRANSACTION = "UPDATE_TRANSACTION",
     DELETE_TRANSACTION = "DELETE_TRANSACTION",
@@ -34,7 +34,7 @@ export class GatewayService {
             return ErrorHandler.handle("Dados do cliente incompletos", socket);
         }
 
-        await this.redirectToService(AssyncEvent.CREATE_CUSTOMER.toString(), { name, document, email, password, pixKey, city }, socket);
+        await this.redirectToService(Events.CREATE_CUSTOMER.toString(), { name, document, email, password, pixKey, city }, socket);
     }
 
   public async loginCustomer(email: string, password: string, socket: any): Promise<void> {
@@ -43,7 +43,7 @@ export class GatewayService {
     }
 
     await this.redirectToService(
-      AssyncEvent.LOGIN_CUSTOMER.toString(),
+      Events.LOGIN_CUSTOMER.toString(),
       { email, password },
       socket
     );
@@ -58,7 +58,7 @@ export class GatewayService {
             return ErrorHandler.handle("ID do cliente não corresponde ao token", socket);
         }
 
-        await this.redirectToService(AssyncEvent.GET_CUSTOMER.toString(), { customerId }, socket);
+        await this.redirectToService(Events.GET_CUSTOMER.toString(), { customerId }, socket);
     }
 
     public async updateCustomer(customerId:string, name: string|undefined, document: string|undefined, email: string|undefined, password: string|undefined, pixKey: string|undefined, city: string|undefined, tokenId:string, socket: any): Promise<void> {
@@ -79,7 +79,7 @@ export class GatewayService {
         if (pixKey) dataToUpdate.pixKey = pixKey;
         if (city) dataToUpdate.city = city;
         
-        await this.redirectToService(AssyncEvent.UPDATE_CUSTOMER.toString(), { customerId, dataToUpdate }, socket);
+        await this.redirectToService(Events.UPDATE_CUSTOMER.toString(), { customerId, dataToUpdate }, socket);
     }
 
     public async deleteCustomer(customerId: string, tokenId: string, socket: any): Promise<void> {
@@ -91,7 +91,7 @@ export class GatewayService {
             return ErrorHandler.handle("ID do cliente não corresponde ao token", socket);
         }
 
-        await this.redirectToService(AssyncEvent.DELETE_CUSTOMER.toString(), { customerId }, socket);
+        await this.redirectToService(Events.DELETE_CUSTOMER.toString(), { customerId }, socket);
     }
 
     public async createTransaction(amount: string, pixKey: string, customerName: string, customerCity: string, customerId: string, tokenId: string, socket: any): Promise<void> {
@@ -103,7 +103,7 @@ export class GatewayService {
             return ErrorHandler.handle("ID do cliente não corresponde ao token", socket);
         }
 
-        await this.redirectToService(AssyncEvent.CREATE_TRANSACTION.toString(), { amount, pixKey, customerName, customerCity, customerId }, socket);
+        await this.redirectToService(Events.CREATE_TRANSACTION.toString(), { amount, pixKey, customerName, customerCity, customerId }, socket);
     }
 
     public async getTransaction(transactionId: string, customerId: string, tokenId: string, socket: any): Promise<void> {
@@ -115,7 +115,7 @@ export class GatewayService {
             return ErrorHandler.handle("ID do cliente não corresponde ao token", socket);
         }
 
-        await this.redirectToService(AssyncEvent.GET_TRANSACTION.toString(), { transactionId, customerId }, socket);
+        await this.redirectToService(Events.GET_TRANSACTION.toString(), { transactionId, customerId }, socket);
     }
 
     public async getTransactionHistory(customerId: string, tokenId: string, socket: any): Promise<void> {
@@ -127,7 +127,7 @@ export class GatewayService {
             return ErrorHandler.handle("ID do cliente não corresponde ao token", socket);
         }
 
-        await this.redirectToService(AssyncEvent.GET_TRANSACTION_HISTORY.toString(), { customerId }, socket);
+        await this.redirectToService(Events.GET_TRANSACTION_HISTORY.toString(), { customerId }, socket);
     }
 
     public async updateTransaction(id: string, customerId: string, payerEmail: string, tokenId: string, socket: any): Promise<void> {
@@ -139,7 +139,7 @@ export class GatewayService {
             return ErrorHandler.handle("ID do cliente não corresponde ao token", socket);
         }
 
-        await this.redirectToService(AssyncEvent.UPDATE_TRANSACTION.toString(), { id, customerId, payerEmail }, socket);
+        await this.redirectToService(Events.UPDATE_TRANSACTION.toString(), { id, customerId, payerEmail }, socket);
     }
 
     public async deleteTransaction(transactionId: string, customerId: string, tokenId: string, socket: any): Promise<void> {
@@ -151,7 +151,7 @@ export class GatewayService {
             return ErrorHandler.handle("ID do cliente não corresponde ao token", socket);
         }
 
-        await this.redirectToService(AssyncEvent.DELETE_TRANSACTION.toString(), { transactionId, customerId }, socket);
+        await this.redirectToService(Events.DELETE_TRANSACTION.toString(), { transactionId, customerId }, socket);
     }
 
     private async redirectToService(event:string, apiPayload:JsonValue, socket: any): Promise<void> {
