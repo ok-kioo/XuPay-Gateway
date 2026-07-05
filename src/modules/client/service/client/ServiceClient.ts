@@ -3,6 +3,7 @@ import { JsonValue } from "@/@types/contracts/JsonValue";
 import { SocketClient } from "@/infra/client/SocketClient";
 import { JsonCodec } from "@/infra/parser/JsonCodec";
 import { ResponseParser } from "@/infra/parser/ResponseParser";
+import { ServicePayload } from "@/@types/contracts/payload/ServicePayload";
 
 export class ServiceClient {
   constructor(
@@ -19,21 +20,16 @@ export class ServiceClient {
       this.servicePort,
       request
     );
-
-    const parsed = ResponseParser.deserialize(rawResponse);
+    const parsed = ResponseParser.deserializeResponse<ServicePayload>(rawResponse);
 
     if (!parsed) {
       throw new Error("Resposta inválida do serviço alvo");
     }
 
-    const payload = parsed.body.payload;
-
-    if (payload.kind !== "SERVICE_PAYLOAD") {
-      throw new Error("Payload inválido retornado pelo serviço alvo");
-    }
+    const payload = parsed.body as ServicePayload | '';
 
     return {
-      servicePayload: payload.servicePayload
+      servicePayload: payload as JsonValue
     };
 
   }

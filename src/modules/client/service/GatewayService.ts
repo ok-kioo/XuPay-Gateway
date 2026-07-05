@@ -170,7 +170,7 @@ export class GatewayService {
 
         if(serviceResponse == null){
             return ErrorHandler.handle("Falha ao receber resposta", socket);
-        }
+        }   
 
         console.log("----resposta do serviço");
         console.log(JSON.stringify(serviceResponse, null, 2));
