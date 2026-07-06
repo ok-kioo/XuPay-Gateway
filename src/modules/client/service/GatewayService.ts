@@ -58,7 +58,7 @@ export class GatewayService {
             return ErrorHandler.handle("ID do cliente não corresponde ao token", socket);
         }
 
-        await this.redirectToService(Events.GET_CUSTOMER.toString(), { customerId }, socket);
+        await this.redirectToService(Events.GET_CUSTOMER.toString(), { id:customerId }, socket);
     }
 
     public async updateCustomer(customerId:string, name: string|undefined, document: string|undefined, email: string|undefined, password: string|undefined, pixKey: string|undefined, city: string|undefined, tokenId:string, socket: any): Promise<void> {
@@ -79,7 +79,7 @@ export class GatewayService {
         if (pixKey) dataToUpdate.pixKey = pixKey;
         if (city) dataToUpdate.city = city;
         
-        await this.redirectToService(Events.UPDATE_CUSTOMER.toString(), { customerId, dataToUpdate }, socket);
+        await this.redirectToService(Events.UPDATE_CUSTOMER.toString(), { id:customerId, dataToUpdate }, socket);
     }
 
     public async deleteCustomer(customerId: string, tokenId: string, socket: any): Promise<void> {
@@ -91,7 +91,7 @@ export class GatewayService {
             return ErrorHandler.handle("ID do cliente não corresponde ao token", socket);
         }
 
-        await this.redirectToService(Events.DELETE_CUSTOMER.toString(), { customerId }, socket);
+        await this.redirectToService(Events.DELETE_CUSTOMER.toString(), { id:customerId }, socket);
     }
 
     public async createTransaction(amount: string, pixKey: string, customerName: string, customerCity: string, customerId: string, tokenId: string, socket: any): Promise<void> {
@@ -127,7 +127,7 @@ export class GatewayService {
             return ErrorHandler.handle("ID do cliente não corresponde ao token", socket);
         }
 
-        await this.redirectToService(Events.GET_TRANSACTION_HISTORY.toString(), { customerId }, socket);
+        await this.redirectToService(Events.GET_TRANSACTION_HISTORY.toString(), { id:customerId }, socket);
     }
 
     public async updateTransaction(id: string, customerId: string, payerEmail: string, tokenId: string, socket: any): Promise<void> {
