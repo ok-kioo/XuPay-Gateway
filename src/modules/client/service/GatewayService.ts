@@ -79,7 +79,7 @@ export class GatewayService {
         if (pixKey) dataToUpdate.pixKey = pixKey;
         if (city) dataToUpdate.city = city;
         
-        await this.redirectToService(Events.UPDATE_CUSTOMER.toString(), { id:customerId, dataToUpdate }, socket);
+        await this.redirectToService(Events.UPDATE_CUSTOMER.toString(), { id:customerId, ...dataToUpdate }, socket);
     }
 
     public async deleteCustomer(customerId: string, tokenId: string, socket: any): Promise<void> {

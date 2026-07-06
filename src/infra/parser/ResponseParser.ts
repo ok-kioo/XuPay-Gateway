@@ -250,17 +250,19 @@ export class ResponseParser {
   }
 
   private static parseUpdateCustomerPayload(payload: JsonObject): UpdateCustomerPayload {
-    return {
+    const result = {
       kind: "UPDATE_CUSTOMER_PAYLOAD",
-      id: this.requiredString(payload.id, "id"),
-      name: this.optionalString(payload.name),
+      id: this.requiredString(payload.customerId, "customerId"),
+      name: this.optionalString(payload.name) ,
       document: this.optionalString(payload.document),
       email: this.optionalString(payload.email),
       password: this.optionalString(payload.password),
       balance: this.optionalString(payload.balance),
       pixKey: this.optionalString(payload.pixKey),
       city: this.optionalString(payload.city),
-    };
+    } as UpdateCustomerPayload;
+
+    return result;
   }
 
   private static parseDeleteCustomerPayload(payload: JsonObject): DeleteCustomerPayload {
