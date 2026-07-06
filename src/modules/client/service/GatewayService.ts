@@ -127,7 +127,7 @@ export class GatewayService {
             return ErrorHandler.handle("ID do cliente não corresponde ao token", socket);
         }
 
-        await this.redirectToService(Events.GET_TRANSACTION_HISTORY.toString(), { id:customerId }, socket);
+        await this.redirectToService(Events.GET_TRANSACTION_HISTORY.toString(), { customerId }, socket);
     }
 
     public async updateTransaction(id: string, customerId: string, payerEmail: string, tokenId: string, socket: any): Promise<void> {
